@@ -73,11 +73,26 @@ function App() {
       <h3>Cities within Intersection:</h3>
       <ul>
         {cities.length > 0 ? (
-          cities.map((city, index) => (
-            <li key={index}>
-              {city.address.municipality}, {city.address.countryCode}
-            </li>
-          ))
+          (() => {
+            const seen = new Set();
+            return cities.filter(city => {
+              const key = `${city.address.municipality}|${city.address.countryCode}`;
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            }).map((city, index) => {
+              const lon = city.position?.lon ?? city.position?.[0];
+              const lat = city.position?.lat ?? city.position?.[1];
+              return (
+                <li key={index}>
+                  {city.address.municipality}, {city.address.countryCode}
+                  {lat !== undefined && lon !== undefined && (
+                    <span> ({lat}, {lon})</span>
+                  )}
+                </li>
+              );
+            });
+          })()
         ) : (
           <li>No cities found in the intersection.</li>
         )}
